@@ -148,4 +148,4 @@ WHERE obj_name = 'ALUNO' and owner = 'REP_FICHA1';
 SPOOL OFF;
 
 -- apagar registos da auditoria
-DELETE FROM AUD$ WHERE action_name = 'UPDATE' AND USERNAME = 'JALMEIDA'
+DELETE FROM AUD$ WHERE action_name = 'UPDATE' AND USERNAME = 'JALMEIDA';
