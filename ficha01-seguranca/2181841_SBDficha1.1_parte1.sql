@@ -215,3 +215,87 @@ WHERE grantee = 'ROLE_FUNC';
 SELECT TABLE_NAME, COLUMN_NAME, PRIVILEGE
 FROM user_col_privs_made
 WHERE grantee = 'ROLE_FUNC';
+
+
+--GRANT ROLE_FUNC TO jalmeida;
+
+----------------------------------------------------------------
+-- Aula 24/02/2020
+
+-- TESTAR 
+-- Jalmeida deve fazer:
+	-- consultar tabela alunos
+	-- inserir um aluno
+	-- atualizar o nome e morada de um aluno    	--> esperamos que corra bem
+	-- atualizar o bi de um aluno   				--> esperamos que dê erro (pois não é suposto ser possivel)
+
+conn jalmeida/JALMEIDA
+
+SELECT * FROM rep_ficha1.aluno;
+
+INSERT INTO rep_ficha1.aluno (BI, NOME, MORADA, DATA_NASC, ULTIMA_CATEGORIA_OBTIDA, DATA_ULTIMA_CATEGORIA_OBTIDA, TOTAL_REPROVACOES) VALUES (14540543,	'Andre Paulo',	'Caldas da Rainha',	to_date('24-05-1998', 'dd-mm-yyyy'),	'B',	to_date('23-09-2016', 'dd-mm-yyyy'), 0);
+
+UPDATE rep_ficha1.aluno
+set nome = 'Andre Paulo', morada = 'Leiria'
+WHERE bi = 14540543;
+
+UPDATE rep_ficha1.aluno
+set bi = 14540544
+WHERE nome = 'Andre Paulo';
+
+-------------------------
+--     QUESTÃO 7
+-------------------------
+-- dar permissão para criar vistas
+conn sys/sys as sysdba
+GRANT CREATE VIEW TO rep_ficha1; 
+
+SELECT privilege, grantee
+FROM dba_sys_privs
+WHERE lower(grantee) = 'rep_ficha1';
+
+-- rep_ficha1
+conn rep_ficha1/rep
+
+-- criar vista v_exames
+CREATE OR REPLACE VIEW v_exames AS 
+	SELECT local, data, categoria
+	FROM exame
+	WHERE data > SYSDATE AND data < SYSDATE + 30;
+
+
+-- dar acesso à vista ao role_aluno
+GRANT SELECT ON rep_ficha1.v_exames TO ROLE_ALUNO;
+
+-- verificar vista foi criada no dicionario de dados
+-- testar
+-- entrar como aluno
+conn SUSANA10800008/SUSANA10800008
+
+-- mostrar vista conseguir aceder à vista
+SELECT * FROM rep_ficha1.v_exames;
+
+
+-------------------------
+--     QUESTÃO 8
+-------------------------
+
+
+conn rep_ficha1/rep
+
+CREATE OR REPLACE VIEW v_dados AS 
+	SELECT bi, nome, morada, data_nasc
+	FROM aluno
+	WHERE upper(username) = USER;
+
+GRANT SELECT ON rep_ficha1.v_dados TO ROLE_ALUNO;
+
+SELECT * FROM user_tab_privs_made;
+
+conn SUSANA10800008/SUSANA10800008
+
+-- mostrar vista conseguir aceder à vista
+SELECT * FROM rep_ficha1.v_dados;
+
+conn FILIPE10900009/FILIPE10900009;
+SELECT * FROM rep_ficha1.v_dados;
